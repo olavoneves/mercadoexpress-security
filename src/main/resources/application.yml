@@ -89,6 +89,7 @@ spring:
     init:
       mode: always
       data-locations: classpath:db/data-dev.sql
+      encoding: UTF-8
 
   thymeleaf:
     cache: false
