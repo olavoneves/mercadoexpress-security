@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<!--
+  Um unico formulario serve para cadastrar e editar. O que muda e o destino do
+  POST e o texto dos botoes, decididos pela variavel 'edicao'.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabeca(${edicao} ? 'Editar produto' : 'Cadastrar produto')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('admin')}"></header>
+<nav th:replace="~{fragments/layout :: faixaAdmin(${edicao} ? 'editar' : 'novo')}"></nav>
+
+<main id="conteudo" class="conteudo">
+    <div class="envelope">
+
+        <a class="voltar" th:href="@{/admin}">Voltar para o painel</a>
+
+        <div class="formulario">
+
+            <h1 th:if="${edicao}">Editar produto</h1>
+            <h1 th:unless="${edicao}">Cadastrar produto</h1>
+            <p th:if="${edicao}">
+                Alterar os dados aqui muda imediatamente o que o catálogo exibe.
+            </p>
+            <p th:unless="${edicao}">
+                Preencha os dados do item. Ele entra no catálogo assim que for salvo como ativo.
+            </p>
+
+            <form th:object="${produto}" method="post" novalidate
+                  th:action="${edicao}
+                             ? @{/admin/produtos/{id}(id=${produto.id ?: idEmEdicao})}
+                             : @{/admin/produtos}">
+
+                <!-- Resumo dos erros no topo: leitor de tela nao precisa cacar campo a campo -->
+                <div class="sumario-erros" role="alert" th:if="${#fields.hasAnyErrors()}">
+                    <h2>Confira os campos destacados</h2>
+                    <ul>
+                        <li th:each="erro : ${#fields.allErrors()}" th:text="${erro}">Mensagem.</li>
+                    </ul>
+                </div>
+
+                <div class="campo" th:classappend="${#fields.hasErrors('nome')} ? 'campo--erro'">
+                    <label for="nome">Nome do produto</label>
+                    <input id="nome" type="text" th:field="*{nome}" maxlength="100"
+                           placeholder="Ex.: Banana prata" autofocus>
+                    <span class="campo__erro" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">Erro.</span>
+                </div>
+
+                <div class="dupla">
+                    <div class="campo" th:classappend="${#fields.hasErrors('tipo')} ? 'campo--erro'">
+                        <label for="tipo">Tipo</label>
+                        <input id="tipo" type="text" th:field="*{tipo}" maxlength="50"
+                               placeholder="Ex.: Fruta">
+                        <span class="campo__erro" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}">Erro.</span>
+                    </div>
+
+                    <div class="campo" th:classappend="${#fields.hasErrors('setor')} ? 'campo--erro'">
+                        <label for="setor">Setor</label>
+                        <select id="setor" th:field="*{setor}">
+                            <option value="">Escolha um setor</option>
+                            <option th:each="s : ${setoresDisponiveis}" th:value="${s}" th:text="${s}">Hortifruti</option>
+                        </select>
+                        <span class="campo__erro" th:if="${#fields.hasErrors('setor')}" th:errors="*{setor}">Erro.</span>
+                    </div>
+                </div>
+
+                <div class="dupla">
+                    <div class="campo" th:classappend="${#fields.hasErrors('tamanho')} ? 'campo--erro'">
+                        <label for="tamanho">Tamanho ou volume</label>
+                        <input id="tamanho" type="text" th:field="*{tamanho}" maxlength="30"
+                               placeholder="Ex.: 1kg, 500ml, M">
+                        <span class="campo__ajuda">Opcional. Aparece abaixo do nome no card do catálogo.</span>
+                        <span class="campo__erro" th:if="${#fields.hasErrors('tamanho')}" th:errors="*{tamanho}">Erro.</span>
+                    </div>
+
+                    <div class="campo" th:classappend="${#fields.hasErrors('preco')} ? 'campo--erro'">
+                        <label for="preco">Preço em reais</label>
+                        <input id="preco" type="number" step="0.01" min="0.01" th:field="*{preco}"
+                               placeholder="0.00">
+                        <span class="campo__ajuda">Use ponto como separador decimal, ex.: 7.99.</span>
+                        <span class="campo__erro" th:if="${#fields.hasErrors('preco')}" th:errors="*{preco}">Erro.</span>
+                    </div>
+                </div>
+
+                <div class="campo" th:classappend="${#fields.hasErrors('descricao')} ? 'campo--erro'">
+                    <label for="descricao">Descrição</label>
+                    <textarea id="descricao" th:field="*{descricao}" maxlength="500"
+                              placeholder="Como o produto é vendido, de onde vem, para que serve..."></textarea>
+                    <span class="campo__ajuda">Até 500 caracteres. Aparece na ficha do produto.</span>
+                    <span class="campo__erro" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}">Erro.</span>
+                </div>
+
+                <div class="campo" th:classappend="${#fields.hasErrors('estoque')} ? 'campo--erro'">
+                    <label for="estoque">Quantidade em estoque</label>
+                    <input id="estoque" type="number" min="0" step="1" th:field="*{estoque}">
+                    <span class="campo__ajuda">Zero mantém o produto no catálogo, marcado como sem estoque.</span>
+                    <span class="campo__erro" th:if="${#fields.hasErrors('estoque')}" th:errors="*{estoque}">Erro.</span>
+                </div>
+
+                <div class="campo campo--marcador">
+                    <input id="ativo" type="checkbox" th:field="*{ativo}">
+                    <label for="ativo">
+                        Exibir no catálogo
+                        <span class="campo__ajuda">
+                            Desmarque para tirar o produto do ar sem apagar o registro do banco.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="acoes-formulario">
+                    <button type="submit" class="botao" th:text="${edicao} ? 'Salvar alterações' : 'Salvar produto'">
+                        Salvar produto
+                    </button>
+                    <a class="botao botao--secundario" th:href="@{/admin}">Cancelar</a>
+                    <a class="acao-linha acao-linha--perigo acoes-formulario__direita" th:if="${edicao}"
+                       th:href="@{/admin/produtos/{id}/excluir(id=${produto.id ?: idEmEdicao})}">Excluir produto</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

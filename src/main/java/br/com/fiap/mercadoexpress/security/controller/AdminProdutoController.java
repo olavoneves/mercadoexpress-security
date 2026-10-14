@@ -63,4 +63,94 @@ public class AdminProdutoController {
 
         return "admin/painel";
     }
+
+    // ------------------------------------------------------------------
+    // CREATE
+    // ------------------------------------------------------------------
+
+    /** GET /admin/produtos/novo - formulario em branco. */
+    @GetMapping("/produtos/novo")
+    public String formularioDeCadastro(Model model) {
+        Produto novo = new Produto();
+        novo.setAtivo(Boolean.TRUE);
+        novo.setEstoque(0);
+        novo.setDataCadastro(LocalDate.now());
+
+        model.addAttribute("produto", novo);
+        model.addAttribute("edicao", false);
+        return "admin/formulario";
+    }
+
+    /** POST /admin/produtos - grava o novo produto. */
+    @PostMapping("/produtos")
+    public String criar(@Valid @ModelAttribute("produto") Produto produto,
+                        BindingResult erros,
+                        Model model,
+                        RedirectAttributes flash) {
+
+        if (erros.hasErrors()) {
+            model.addAttribute("edicao", false);
+            return "admin/formulario";
+        }
+
+        Produto salvo = service.criar(produto);
+        flash.addFlashAttribute("sucesso", "Produto \"" + salvo.getNome() + "\" cadastrado com sucesso.");
+        return "redirect:/admin";
+    }
+
+    // ------------------------------------------------------------------
+    // UPDATE
+    // ------------------------------------------------------------------
+
+    /** GET /admin/produtos/{id}/editar - formulario preenchido. */
+    @GetMapping("/produtos/{id}/editar")
+    public String formularioDeEdicao(@PathVariable Long id, Model model) {
+        model.addAttribute("produto", service.buscarPorId(id));
+        model.addAttribute("edicao", true);
+        return "admin/formulario";
+    }
+
+    /** POST /admin/produtos/{id} - aplica a edicao. */
+    @PostMapping("/produtos/{id}")
+    public String atualizar(@PathVariable Long id,
+                            @Valid @ModelAttribute("produto") Produto produto,
+                            BindingResult erros,
+                            Model model,
+                            RedirectAttributes flash) {
+
+        if (erros.hasErrors()) {
+            model.addAttribute("edicao", true);
+            model.addAttribute("idEmEdicao", id);
+            return "admin/formulario";
+        }
+
+        Produto salvo = service.atualizar(id, produto);
+        flash.addFlashAttribute("sucesso", "Produto \"" + salvo.getNome() + "\" atualizado com sucesso.");
+        return "redirect:/admin";
+    }
+
+    // ------------------------------------------------------------------
+    // DELETE
+    // ------------------------------------------------------------------
+
+    /**
+     * GET /admin/produtos/{id}/excluir - tela de confirmacao. Funciona mesmo com
+     * JavaScript desligado e deixa claro o que sera apagado.
+     */
+    @GetMapping("/produtos/{id}/excluir")
+    public String confirmarExclusao(@PathVariable Long id, Model model) {
+        model.addAttribute("produto", service.buscarPorId(id));
+        return "admin/excluir";
+    }
+
+    /**
+     * POST /admin/produtos/{id}/excluir - remove o produto. E POST (nunca GET)
+     * para que nenhum link ou robo consiga apagar dados, e leva o token CSRF.
+     */
+    @PostMapping("/produtos/{id}/excluir")
+    public String excluir(@PathVariable Long id, RedirectAttributes flash) {
+        String nome = service.excluir(id);
+        flash.addFlashAttribute("sucesso", "Produto \"" + nome + "\" excluído definitivamente.");
+        return "redirect:/admin";
+    }
 }

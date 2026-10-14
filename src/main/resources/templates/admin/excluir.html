@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!--
+  GET /admin/produtos/{id}/excluir - confirmacao antes de apagar.
+  O botao vermelho envia POST com token CSRF; nenhum GET apaga dados.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabeca('Excluir produto')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('admin')}"></header>
+<nav th:replace="~{fragments/layout :: faixaAdmin('excluir')}"></nav>
+
+<main id="conteudo" class="conteudo">
+    <div class="envelope">
+
+        <a class="voltar" th:href="@{/admin}">Voltar para o painel</a>
+
+        <section class="confirmacao" aria-labelledby="titulo-exclusao">
+            <p class="sobretitulo sobretitulo--perigo">Ação sem volta</p>
+            <h1 id="titulo-exclusao">Excluir este produto?</h1>
+            <p>
+                O registro será apagado da tabela <code>TDS_SEC_MVC_TB_MERCADO</code>.
+                Se a ideia é só tirá-lo do catálogo por um tempo, edite o produto e desmarque
+                "Exibir no catálogo".
+            </p>
+
+            <div class="confirmacao__produto">
+                <span class="etiqueta etiqueta--estatica">
+                    <span class="etiqueta__moeda">R$</span>
+                    <span th:text="${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">7,99</span>
+                </span>
+                <div>
+                    <span class="produto__setor" th:text="${produto.setor}">Hortifruti</span>
+                    <strong class="produto__nome" th:text="${produto.nome}">Banana prata</strong>
+                    <p class="produto__detalhe">
+                        Código <span th:text="${produto.id}">3</span> &middot;
+                        <span th:text="${produto.estoque} + ' em estoque'">30 em estoque</span>
+                    </p>
+                </div>
+            </div>
+
+            <form th:action="@{/admin/produtos/{id}/excluir(id=${produto.id})}" method="post"
+                  class="acoes-formulario">
+                <button type="submit" class="botao botao--perigo">Sim, excluir definitivamente</button>
+                <a class="botao botao--secundario" th:href="@{/admin}">Cancelar</a>
+            </form>
+        </section>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
