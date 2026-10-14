@@ -120,11 +120,11 @@ public class ProdutoService {
         return existente.getNome();
     }
 
-    /** Converte texto em branco vindo do formulario para null (= filtro desligado). */
+    /**
+     * Filtro ausente vira texto vazio (= condicao desligada na consulta). Nunca
+     * null: ver o comentario do {@link ProdutoRepository} sobre o PostgreSQL.
+     */
     private String normalizar(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
-        }
-        return valor.trim();
+        return valor == null ? "" : valor.trim();
     }
 }
