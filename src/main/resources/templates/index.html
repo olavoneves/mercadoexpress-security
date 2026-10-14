@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<!--
+  Landing page publica (GET /). Primeira impressao do Mercado Express:
+  apresenta o mercado, mostra produtos em destaque vindos do PostgreSQL e
+  conduz aos CTAs "Criar conta" e "Entrar".
+-->
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: cabeca('Feira de bairro com preço de etiqueta')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('landing')}"></header>
+
+<main id="conteudo">
+
+    <!-- ================= Abertura ================= -->
+    <section class="hero" aria-labelledby="titulo-hero">
+        <div class="envelope hero__grade">
+
+            <div class="hero__texto">
+                <p class="sobretitulo sobretitulo--claro">Feira de bairro &middot; aberta todo dia</p>
+                <h1 id="titulo-hero">
+                    A feira do bairro,
+                    <span class="hero__destaque">com preço de etiqueta</span>
+                    e sem fila no caixa.
+                </h1>
+                <p class="hero__lead">
+                    Hortifrúti colhido na semana, pão de hora em hora e mercearia com preço
+                    de gôndola. Crie sua conta para abrir o catálogo completo e a ficha
+                    de cada produto.
+                </p>
+
+                <div class="hero__acoes" sec:authorize="!isAuthenticated()">
+                    <a class="botao botao--etiqueta botao--grande" th:href="@{/cadastro}">Criar conta grátis</a>
+                    <a class="botao botao--contorno-claro botao--grande" th:href="@{/login}">Entrar</a>
+                </div>
+                <div class="hero__acoes" sec:authorize="isAuthenticated()">
+                    <a class="botao botao--etiqueta botao--grande" th:href="@{/catalogo}">Abrir o catálogo</a>
+                    <a class="botao botao--contorno-claro botao--grande" sec:authorize="hasRole('ADMIN')"
+                       th:href="@{/admin}">Ir para o painel</a>
+                    <a class="botao botao--contorno-claro botao--grande" sec:authorize="!hasRole('ADMIN')"
+                       th:href="@{/minha-conta}">Minha conta</a>
+                </div>
+
+                <ul class="hero__numeros">
+                    <li><strong th:text="${totalProdutos}">12</strong> produtos na gôndola</li>
+                    <li><strong th:text="${#lists.size(setores)}">7</strong> setores</li>
+                    <li><strong>2</strong> perfis de acesso</li>
+                </ul>
+            </div>
+
+            <!-- Quadro de precos: lousa de feira com os destaques do banco -->
+            <aside class="quadro" aria-labelledby="titulo-quadro">
+                <p class="quadro__prego" aria-hidden="true"></p>
+                <h2 id="titulo-quadro" class="quadro__titulo">Ofertas de hoje</h2>
+                <ul class="quadro__lista" th:if="${!#lists.isEmpty(destaques)}">
+                    <li th:each="produto, volta : ${destaques}" th:if="${volta.index < 4}">
+                        <span class="quadro__item">
+                            <span th:text="${produto.nome}">Banana prata</span>
+                            <small th:text="${produto.tamanho} ?: ${produto.tipo}">1kg</small>
+                        </span>
+                        <span class="quadro__pontilhado" aria-hidden="true"></span>
+                        <span class="quadro__preco"
+                              th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 7,99</span>
+                    </li>
+                </ul>
+                <p class="quadro__vazio" th:if="${#lists.isEmpty(destaques)}">
+                    A equipe está montando as bancas. Volte daqui a pouco.
+                </p>
+                <p class="quadro__rodape">Preços atualizados pela equipe no painel.</p>
+            </aside>
+        </div>
+    </section>
+
+    <!-- ================= Setores ================= -->
+    <section class="faixa-setores" aria-label="Setores do mercado" th:if="${!#lists.isEmpty(setores)}">
+        <div class="envelope faixa-setores__conteudo">
+            <span class="faixa-setores__rotulo">Setores</span>
+            <span class="faixa-setores__item" th:each="setor : ${setores}" th:text="${setor}">Hortifruti</span>
+        </div>
+    </section>
+
+    <!-- ================= Destaques ================= -->
+    <section class="secao" aria-labelledby="titulo-destaques">
+        <div class="envelope">
+            <div class="secao__cabecalho">
+                <div>
+                    <p class="sobretitulo">Direto da gôndola</p>
+                    <h2 id="titulo-destaques">Em destaque na feira</h2>
+                </div>
+                <a class="secao__link" th:href="@{/catalogo}">Ver o catálogo completo</a>
+            </div>
+
+            <div class="vitrine" th:if="${!#lists.isEmpty(destaques)}">
+                <a class="produto" th:each="produto : ${destaques}"
+                   th:href="@{/produtos/{id}(id=${produto.id})}">
+
+                    <span class="etiqueta">
+                        <span class="etiqueta__moeda">R$</span>
+                        <span th:text="${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">7,99</span>
+                    </span>
+
+                    <span class="produto__setor" th:text="${produto.setor}">Hortifruti</span>
+                    <span class="produto__nome" th:text="${produto.nome}">Banana prata</span>
+                    <p class="produto__detalhe">
+                        <span th:text="${produto.tipo}">Fruta</span>
+                        <span th:if="${produto.tamanho}" th:text="'&middot; ' + ${produto.tamanho}">&middot; 1kg</span>
+                    </p>
+
+                    <span class="produto__rodape">
+                        <span class="selo selo--estoque" th:text="${produto.estoque} + ' em estoque'">30 em estoque</span>
+                        <span class="produto__cadeado" sec:authorize="!isAuthenticated()">Ficha para clientes</span>
+                    </span>
+                </a>
+            </div>
+
+            <div class="vazio" th:if="${#lists.isEmpty(destaques)}">
+                <h2>As gôndolas ainda estão vazias</h2>
+                <p>Assim que a equipe cadastrar os primeiros produtos no painel, eles aparecem aqui.</p>
+            </div>
+
+            <p class="secao__nota" sec:authorize="!isAuthenticated()">
+                A ficha completa de cada produto e o catálogo com busca são exclusivos para quem tem conta.
+                <a th:href="@{/cadastro}">Criar a minha</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- ================= Como funciona ================= -->
+    <section class="secao secao--cinza" aria-labelledby="titulo-passos">
+        <div class="envelope">
+            <div class="secao__cabecalho">
+                <div>
+                    <p class="sobretitulo">Três passos</p>
+                    <h2 id="titulo-passos">Do cadastro à sacola</h2>
+                </div>
+            </div>
+
+            <ol class="passos">
+                <li class="passo">
+                    <span class="passo__numero" aria-hidden="true">1</span>
+                    <h3>Crie sua conta</h3>
+                    <p>Nome, e-mail e uma senha de pelo menos 6 caracteres. A senha é guardada com BCrypt.</p>
+                </li>
+                <li class="passo">
+                    <span class="passo__numero" aria-hidden="true">2</span>
+                    <h3>Entre com seu e-mail</h3>
+                    <p>Esqueceu se já tem conta? Digite o e-mail: se ele não existir, levamos você ao cadastro.</p>
+                </li>
+                <li class="passo">
+                    <span class="passo__numero" aria-hidden="true">3</span>
+                    <h3>Passeie pela feira</h3>
+                    <p>Catálogo com busca e filtro por setor, ficha de cada produto e a sua conta para editar.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ================= Perfis ================= -->
+    <section class="secao" aria-labelledby="titulo-perfis">
+        <div class="envelope">
+            <div class="secao__cabecalho">
+                <div>
+                    <p class="sobretitulo">Quem entra por onde</p>
+                    <h2 id="titulo-perfis">Duas portas, um só login</h2>
+                </div>
+            </div>
+
+            <div class="perfis">
+                <article class="perfil-cartao">
+                    <span class="selo selo--cliente">Cliente</span>
+                    <h3>Para quem compra</h3>
+                    <p>Todo cadastro feito pelo site nasce com este perfil.</p>
+                    <ul>
+                        <li>Catálogo completo com busca e setores</li>
+                        <li>Ficha detalhada de cada produto</li>
+                        <li>Minha conta: nome, e-mail e senha</li>
+                    </ul>
+                    <p class="perfil-cartao__destino">Depois do login: <code>/catalogo</code></p>
+                </article>
+
+                <article class="perfil-cartao perfil-cartao--admin">
+                    <span class="selo selo--admin">Administrador</span>
+                    <h3>Para a equipe do mercado</h3>
+                    <p>Tudo o que o cliente vê, mais o painel de gestão.</p>
+                    <ul>
+                        <li>Cadastrar, editar e excluir produtos</li>
+                        <li>Tirar um item da vitrine sem apagá-lo</li>
+                        <li>Ver quem se cadastrou e promover a administrador</li>
+                    </ul>
+                    <p class="perfil-cartao__destino">Depois do login: <code>/admin</code></p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= Chamada final ================= -->
+    <section class="chamada" sec:authorize="!isAuthenticated()" aria-labelledby="titulo-chamada">
+        <div class="envelope chamada__conteudo">
+            <h2 id="titulo-chamada">A sua conta sai em menos de um minuto.</h2>
+            <div class="chamada__acoes">
+                <a class="botao botao--tinta botao--grande" th:href="@{/cadastro}">Criar conta</a>
+                <a class="chamada__link" th:href="@{/login}">Já tenho conta</a>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
