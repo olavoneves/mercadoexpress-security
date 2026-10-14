@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<!-- GET /admin - tela restrita do ADMIN: lista do CRUD de produtos. -->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabeca('Painel de produtos')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('admin')}"></header>
+<nav th:replace="~{fragments/layout :: faixaAdmin('lista')}"></nav>
+
+<main id="conteudo" class="conteudo">
+    <div class="envelope">
+
+        <div th:replace="~{fragments/layout :: avisos}"></div>
+
+        <div class="painel-cabecalho">
+            <div>
+                <p class="sobretitulo">
+                    Olá, <span th:text="${#authentication.principal.primeiroNome}">Admin</span>
+                </p>
+                <h1>Produtos cadastrados</h1>
+                <p>Cadastre, edite e exclua os itens que aparecem no catálogo dos clientes.</p>
+            </div>
+            <a class="botao" th:href="@{/admin/produtos/novo}">Cadastrar produto</a>
+        </div>
+
+        <div class="resumo">
+            <div class="resumo__item">
+                <span class="resumo__numero" th:text="${pagina.totalElements}">14</span>
+                <span class="resumo__rotulo">no filtro atual</span>
+            </div>
+            <div class="resumo__item">
+                <span class="resumo__numero" th:text="${totalAtivos}">12</span>
+                <span class="resumo__rotulo">no catálogo</span>
+            </div>
+            <div class="resumo__item">
+                <span class="resumo__numero" th:text="${totalInativos}">2</span>
+                <span class="resumo__rotulo">fora de linha</span>
+            </div>
+            <a class="resumo__item resumo__item--link" th:href="@{/admin/usuarios}">
+                <span class="resumo__numero">&rarr;</span>
+                <span class="resumo__rotulo">usuários cadastrados</span>
+            </a>
+        </div>
+
+        <form class="barra-filtro" th:action="@{/admin}" method="get" role="search">
+            <label class="pular-para-conteudo" for="busca-admin">Buscar produto pelo nome</label>
+            <input id="busca-admin" type="search" name="busca" th:value="${busca}"
+                   placeholder="Buscar pelo nome">
+
+            <label class="pular-para-conteudo" for="setor-admin">Filtrar por setor</label>
+            <select id="setor-admin" name="setor">
+                <option value="">Todos os setores</option>
+                <option th:each="s : ${setoresDisponiveis}" th:value="${s}" th:text="${s}"
+                        th:selected="${s == setorSelecionado}">Hortifruti</option>
+            </select>
+
+            <button type="submit" class="botao botao--secundario">Filtrar</button>
+            <a class="acao-linha" th:href="@{/admin}"
+               th:if="${busca != null or setorSelecionado != null}">Limpar filtros</a>
+        </form>
+
+        <!-- Admin e ferramenta de trabalho: tabela densa, nao cards -->
+        <div class="tabela-rolagem" th:if="${pagina.hasContent()}">
+            <table class="tabela">
+                <caption class="pular-para-conteudo">Lista de produtos cadastrados</caption>
+                <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Produto</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Setor</th>
+                    <th scope="col">Tamanho</th>
+                    <th scope="col" class="numero">Preço</th>
+                    <th scope="col" class="numero">Estoque</th>
+                    <th scope="col">Situação</th>
+                    <th scope="col">Cadastro</th>
+                    <th scope="col">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="produto : ${pagina.content}">
+                    <td class="numero" th:text="${produto.id}">3</td>
+                    <td class="produto-nome">
+                        <a th:href="@{/produtos/{id}(id=${produto.id})}" th:text="${produto.nome}">Banana prata</a>
+                    </td>
+                    <td th:text="${produto.tipo}">Fruta</td>
+                    <td th:text="${produto.setor}">Hortifruti</td>
+                    <td th:text="${produto.tamanho} ?: '-'">1kg</td>
+                    <td class="numero"
+                        th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 7,99</td>
+                    <td class="numero" th:text="${produto.estoque} ?: 0">30</td>
+                    <td>
+                        <span class="selo selo--ativo" th:if="${produto.ativo}">No catálogo</span>
+                        <span class="selo selo--inativo" th:unless="${produto.ativo}">Fora de linha</span>
+                    </td>
+                    <td th:text="${produto.dataCadastro != null}
+                                 ? ${#temporals.format(produto.dataCadastro, 'dd/MM/yyyy')} : '-'">01/09/2026</td>
+                    <td>
+                        <div class="tabela__acoes">
+                            <a class="acao-linha"
+                               th:href="@{/admin/produtos/{id}/editar(id=${produto.id})}">Editar</a>
+                            <a class="acao-linha acao-linha--perigo"
+                               th:href="@{/admin/produtos/{id}/excluir(id=${produto.id})}">Excluir</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="vazio" th:unless="${pagina.hasContent()}">
+            <h2 th:if="${busca != null or setorSelecionado != null}">Nenhum produto bate com esse filtro</h2>
+            <h2 th:unless="${busca != null or setorSelecionado != null}">Comece cadastrando o primeiro produto</h2>
+            <p th:if="${busca != null or setorSelecionado != null}">
+                Limpe os filtros para ver a lista completa ou cadastre um produto novo.
+            </p>
+            <p th:unless="${busca != null or setorSelecionado != null}">
+                O catálogo só ganha vida depois do primeiro cadastro. Leva menos de um minuto.
+            </p>
+            <a class="botao" th:href="@{/admin/produtos/novo}">Cadastrar produto</a>
+        </div>
+
+        <nav th:replace="~{fragments/paginacao :: paginacao(${pagina}, '/admin', ${busca}, ${setorSelecionado})}"></nav>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
