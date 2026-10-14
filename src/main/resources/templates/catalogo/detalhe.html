@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!-- GET /produtos/{id} - ficha completa (CLIENTE ou ADMIN). -->
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: cabeca(${produto.nome})}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('catalogo')}"></header>
+
+<main id="conteudo" class="conteudo">
+    <div class="envelope">
+
+        <a class="voltar" th:href="@{/catalogo}">Voltar para o catálogo</a>
+
+        <article class="detalhe">
+            <div>
+                <span class="produto__setor" th:text="${produto.setor}">Hortifruti</span>
+                <h1 th:text="${produto.nome}">Banana prata</h1>
+
+                <p class="detalhe__descricao" th:if="${produto.descricao}"
+                   th:text="${produto.descricao}">Descrição do produto.</p>
+                <p class="detalhe__descricao" th:unless="${produto.descricao}">
+                    Este produto ainda não tem descrição cadastrada. Consulte a ficha ao lado
+                    para tipo, tamanho e disponibilidade.
+                </p>
+
+                <p>
+                    <span class="selo selo--esgotado" th:if="${produto.esgotado}">Sem estoque hoje</span>
+                    <span class="selo selo--estoque" th:unless="${produto.esgotado}"
+                          th:text="${produto.estoque} + ' unidades disponíveis'">30 unidades disponíveis</span>
+                    <span class="selo selo--inativo" th:if="${!produto.ativo}">Fora de linha</span>
+                </p>
+
+                <p sec:authorize="hasRole('ADMIN')" class="detalhe__admin">
+                    <a class="botao botao--secundario"
+                       th:href="@{/admin/produtos/{id}/editar(id=${produto.id})}">Editar este produto</a>
+                </p>
+            </div>
+
+            <aside class="detalhe__lateral">
+                <span class="etiqueta etiqueta--estatica etiqueta--grande">
+                    <span class="etiqueta__moeda">R$</span>
+                    <span th:text="${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">7,99</span>
+                </span>
+
+                <dl class="ficha">
+                    <div>
+                        <dt>Código</dt>
+                        <dd th:text="${produto.id}">3</dd>
+                    </div>
+                    <div>
+                        <dt>Tipo</dt>
+                        <dd th:text="${produto.tipo}">Fruta</dd>
+                    </div>
+                    <div>
+                        <dt>Setor</dt>
+                        <dd th:text="${produto.setor}">Hortifruti</dd>
+                    </div>
+                    <div>
+                        <dt>Tamanho</dt>
+                        <dd th:text="${produto.tamanho} ?: 'Não informado'">1kg</dd>
+                    </div>
+                    <div>
+                        <dt>Estoque</dt>
+                        <dd th:text="${produto.estoque} ?: 0">30</dd>
+                    </div>
+                    <div>
+                        <dt>No catálogo desde</dt>
+                        <dd th:text="${produto.dataCadastro != null}
+                                     ? ${#temporals.format(produto.dataCadastro, 'dd/MM/yyyy')} : '-'">01/09/2026</dd>
+                    </div>
+                </dl>
+            </aside>
+        </article>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
