@@ -42,7 +42,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       PORT: 8080
     ports:
-      - "8080:8080"
+      # APP_PORT troca a porta do host se a 8080 ja estiver ocupada
+      - "${APP_PORT:-8080}:8080"
 
 volumes:
   dados-postgres:
