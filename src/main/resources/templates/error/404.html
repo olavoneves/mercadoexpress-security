@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabeca('Página não encontrada')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('erro')}"></header>
+
+<main id="conteudo" class="conteudo">
+    <div class="envelope">
+        <section class="recado">
+            <p class="recado__codigo">404</p>
+            <h1>Esse item saiu da gôndola</h1>
+            <p th:text="${mensagem} ?: 'O endereço que você abriu não corresponde a nenhum produto ou página do Mercado Express.'">
+                O endereço que você abriu não existe.
+            </p>
+            <p class="recado__acoes">
+                <a class="botao" th:href="@{/}">Voltar para o início</a>
+            </p>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

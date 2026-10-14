@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<!-- Fallback para qualquer status sem template proprio (500, 503...). -->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabeca('Algo deu errado')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: topo('erro')}"></header>
+
+<main class="conteudo">
+    <div class="envelope">
+        <section class="recado">
+            <p class="recado__codigo" th:text="${status} ?: '500'">500</p>
+            <h1>O caixa travou por aqui</h1>
+            <p>
+                A aplicação não conseguiu concluir essa operação. Tente de novo em instantes
+                ou volte para o início.
+            </p>
+            <p class="recado__acoes">
+                <a class="botao" th:href="@{/}">Voltar para o início</a>
+            </p>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!--
+  Fragmentos reaproveitados por todas as paginas: head, cabecalho, faixa
+  administrativa, avisos e rodape. Nenhum HTML de estrutura e repetido nas telas.
+-->
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="cabeca(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0B6B3A">
+    <title th:text="|${titulo} · Mercado Express|">Mercado Express</title>
+    <link rel="icon" th:href="@{/img/favicon.svg}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75,500;75,600;75,700;75,800&family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body>
+
+<!-- ================= Cabecalho =================
+     secao: 'landing' | 'catalogo' (mostra a busca) | 'conta' | 'admin' | 'auth' | 'erro'
+     Os links aparecem ou somem conforme o perfil, via sec:authorize. -->
+<header class="topo" th:fragment="topo(secao)">
+    <div class="envelope topo__barra">
+        <a class="marca" th:href="@{/}">
+            Mercado <span class="marca__express">Express</span>
+            <span class="marca__selo">Feira de bairro</span>
+        </a>
+
+        <form class="topo__busca" th:if="${secao == 'catalogo'}" th:action="@{/catalogo}" method="get"
+              role="search">
+            <label class="pular-para-conteudo" for="busca-topo">Buscar produto pelo nome</label>
+            <input id="busca-topo" type="search" name="busca" th:value="${busca}"
+                   placeholder="Buscar por nome, ex.: banana">
+            <input type="hidden" name="setor" th:if="${setorSelecionado}" th:value="${setorSelecionado}">
+            <button type="submit">Buscar</button>
+        </form>
+
+        <nav class="topo__acoes" aria-label="Navegação principal">
+
+            <!-- Visitante: os dois CTAs de entrada -->
+            <th:block sec:authorize="!isAuthenticated()">
+                <a class="topo__link" th:href="@{/login}" th:unless="${secao == 'auth'}">Entrar</a>
+                <a class="botao botao--etiqueta botao--compacto" th:href="@{/cadastro}"
+                   th:unless="${secao == 'auth'}">Criar conta</a>
+            </th:block>
+
+            <!-- Logado: links por perfil + identificacao + Sair -->
+            <th:block sec:authorize="isAuthenticated()">
+                <a class="topo__link" th:href="@{/catalogo}"
+                   th:attrappend="aria-current=${secao == 'catalogo'} ? 'page' : null">Catálogo</a>
+                <a class="topo__link" sec:authorize="hasRole('ADMIN')" th:href="@{/admin}"
+                   th:attrappend="aria-current=${secao == 'admin'} ? 'page' : null">Painel</a>
+
+                <a class="topo__usuario" th:href="@{/minha-conta}" title="Minha conta"
+                   th:attrappend="aria-current=${secao == 'conta'} ? 'page' : null">
+                    <span class="avatar" aria-hidden="true"
+                          th:text="${#authentication.principal.inicial}">A</span>
+                    <span class="topo__identidade">
+                        <strong th:text="${#authentication.principal.primeiroNome}">Ana</strong>
+                        <span class="topo__perfil"
+                              th:classappend="${#authentication.principal.admin} ? 'topo__perfil--admin'"
+                              th:text="${#authentication.principal.perfil.rotulo}">Cliente</span>
+                    </span>
+                </a>
+
+                <form th:action="@{/logout}" method="post" class="topo__sair-form">
+                    <button type="submit" class="topo__sair">Sair</button>
+                </form>
+            </th:block>
+        </nav>
+    </div>
+</header>
+
+<!-- ================= Faixa da area administrativa ================= -->
+<nav class="faixa-admin" th:fragment="faixaAdmin(pagina)" aria-label="Navegação do painel">
+    <div class="envelope faixa-admin__conteudo">
+        <strong>Painel administrativo</strong>
+        <a th:href="@{/admin}" th:attrappend="aria-current=${pagina == 'lista'} ? 'page' : null">Produtos</a>
+        <a th:href="@{/admin/produtos/novo}"
+           th:attrappend="aria-current=${pagina == 'novo'} ? 'page' : null">Cadastrar produto</a>
+        <a th:href="@{/admin/usuarios}"
+           th:attrappend="aria-current=${pagina == 'usuarios'} ? 'page' : null">Usuários</a>
+        <a th:href="@{/catalogo}">Ver catálogo</a>
+    </div>
+</nav>
+
+<!-- ================= Mensagens flash ================= -->
+<div th:fragment="avisos">
+    <p class="aviso" role="status" th:if="${sucesso}" th:text="${sucesso}">Mensagem de sucesso.</p>
+    <p class="aviso aviso--erro" role="alert" th:if="${falha}" th:text="${falha}">Mensagem de erro.</p>
+</div>
+
+<!-- ================= Rodape ================= -->
+<footer class="rodape" th:fragment="rodape">
+    <div class="envelope rodape__conteudo">
+        <span>Mercado Express &middot; Checkpoint 5 - Parte I &middot; FIAP TDS</span>
+        <span>Spring Security MVC, Thymeleaf e PostgreSQL</span>
+    </div>
+</footer>
+
+</body>
+</html>

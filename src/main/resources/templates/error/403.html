@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!-- Autenticado sem o perfil exigido (ex.: CLIENTE em /admin). -->
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: cabeca('Acesso negado')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('erro')}"></header>
+
+<main id="conteudo" class="conteudo">
+    <div class="envelope">
+        <section class="recado">
+            <p class="recado__codigo">403</p>
+            <h1>Essa porta é só da equipe</h1>
+            <p>
+                Você entrou como
+                <strong sec:authorize="isAuthenticated()"
+                        th:text="${#authentication.principal.perfil.rotulo}">Cliente</strong>,
+                mas esta área exige o perfil <strong>Administrador</strong> (ROLE_ADMIN).
+            </p>
+            <p class="recado__acoes">
+                <a class="botao" th:href="@{/catalogo}">Voltar para o catálogo</a>
+                <a class="botao botao--secundario" th:href="@{/minha-conta}">Minha conta</a>
+            </p>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
