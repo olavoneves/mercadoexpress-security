@@ -1,0 +1,20 @@
+FIAP - Curso de Tecnologia em Análise e Desenvolvimento de Sistemas (TDS)
+Checkpoint 5 - Parte I (Spring Security MVC, Deploy e PostgreSQL)
+Professor: Dr. Marcel Stefan Wagner
+
+Turma: 2TDSR
+Curso: Análise e Desenvolvimento de Sistemas (TDS)
+
+INTEGRANTES:
+Nome: Olavo Porto Neves          RM: 563558
+Nome: Pedro Henrique França      RM: 561940
+Nome: Luiz Gonçalves             RM: 564495
+
+Repositório GitHub (Spring Security MVC): https://github.com/olavoneves/mercadoexpress-security
+Link do Deploy: [PREENCHER LINK]
+Sistema utilizado para o Deploy: Render (Docker) + PostgreSQL
+IDE utilizada: IntelliJ IDEA
+
+Credenciais de teste:
+Admin: admin@mercado.com / admin123
+Cliente: criar pela tela de cadastro
