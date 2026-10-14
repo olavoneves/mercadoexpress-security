@@ -1,0 +1,48 @@
+# Ambiente local completo: PostgreSQL 16 + aplicacao.
+#
+#   docker compose up -d --build     -> sobe banco e app (http://localhost:8080)
+#   docker compose up -d db          -> so o banco (rode a app pelo IntelliJ)
+#   docker compose down -v           -> derruba tudo e APAGA o volume do banco
+#
+# O database/script.sql roda sozinho na primeira subida do container (volume
+# vazio). As credenciais abaixo sao do Postgres LOCAL e descartavel; podem ser
+# trocadas no arquivo .env (veja .env.example). Nada de producao fica aqui.
+
+services:
+  db:
+    image: postgres:16
+    container_name: mercadoexpress-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mercadoexpress}
+      POSTGRES_USER: ${POSTGRES_USER:-mercado}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mercado}
+    ports:
+      # 5433 no host para nao brigar com um Postgres instalado na maquina
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - dados-postgres:/var/lib/postgresql/data
+      - ./database/script.sql:/docker-entrypoint-initdb.d/01-script.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    container_name: mercadoexpress-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-mercadoexpress}
+      DB_USER: ${POSTGRES_USER:-mercado}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-mercado}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@mercado.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      PORT: 8080
+    ports:
+      - "8080:8080"
+
+volumes:
+  dados-postgres:

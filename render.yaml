@@ -1,0 +1,39 @@
+# Blueprint de deploy do Render (https://render.com).
+# O Render le este arquivo, constroi a imagem do Dockerfile e sobe o servico.
+#
+# Os valores com sync:false sao preenchidos no painel do Render (Environment),
+# para que nenhuma credencial fique versionada no GitHub.
+#
+# Banco: PostgreSQL gerenciado, criado a parte (Render Postgres ou Neon).
+# Antes do primeiro deploy, rode database/script.sql nesse banco.
+# O README tem o passo a passo das duas opcoes.
+
+services:
+  - type: web
+    name: mercadoexpress-security
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    # A landing e publica: serve de health check sem autenticar
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 8080
+
+      # JDBC do Postgres gerenciado, ex.:
+      #   Render: jdbc:postgresql://dpg-xxxx-a:5432/mercadoexpress
+      #   Neon..: jdbc:postgresql://ep-xxxx.sa-east-1.aws.neon.tech/neondb?sslmode=require
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+
+      # Administrador criado no primeiro startup (se ainda nao existir)
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
