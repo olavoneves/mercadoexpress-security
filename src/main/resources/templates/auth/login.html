@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+  Tela de login PROPRIA (substitui a pagina padrao do Spring Security).
+  O formulario posta em /login, que e processado pelo filtro do Spring Security
+  com os parametros "email" e "senha" (ver SecurityConfig.formLogin).
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabeca('Entrar')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('auth')}"></header>
+
+<main id="conteudo" class="conteudo conteudo--acesso">
+    <div class="envelope">
+
+        <div class="acesso">
+
+            <!-- Lado de apresentacao: o "quadro" da feira -->
+            <aside class="acesso__lado" aria-hidden="true">
+                <span class="etiqueta etiqueta--estatica acesso__etiqueta">
+                    <span class="etiqueta__moeda">R$</span>0,00
+                </span>
+                <p class="acesso__chamada">Entrar não custa nada.</p>
+                <ul class="acesso__lista">
+                    <li>Catálogo completo com preço de gôndola</li>
+                    <li>Ficha de cada produto, com estoque do dia</li>
+                    <li>Sua conta, seus dados, editáveis a qualquer hora</li>
+                </ul>
+                <p class="acesso__rodape">Equipe do mercado? O mesmo login leva você direto ao painel.</p>
+            </aside>
+
+            <section class="acesso__form" aria-labelledby="titulo-login">
+                <p class="sobretitulo">Bem-vindo de volta</p>
+                <h1 id="titulo-login">Entrar na sua conta</h1>
+
+                <!-- Flash vindo do cadastro: "Conta criada, Ana!" -->
+                <div th:replace="~{fragments/layout :: avisos}"></div>
+
+                <p class="aviso aviso--atencao" role="status" th:if="${param.restrito}">
+                    Essa página é exclusiva para quem tem conta. Entre abaixo ou
+                    <a th:href="@{/cadastro}">crie a sua em menos de um minuto</a>.
+                </p>
+                <p class="aviso aviso--erro" role="alert" th:if="${param.erro}">
+                    Senha incorreta para este e-mail. Confira e tente de novo.
+                </p>
+                <p class="aviso aviso--erro" role="alert" th:if="${param.inativo}">
+                    Esta conta está desativada. Fale com a equipe do mercado.
+                </p>
+                <p class="aviso" role="status" th:if="${param.logout}">
+                    Você saiu da sua conta. Até a próxima feira!
+                </p>
+
+                <!-- th:action injeta o token CSRF como campo oculto -->
+                <form th:action="@{/login}" method="post" class="acesso__campos">
+                    <div class="campo" th:classappend="${param.erro} ? 'campo--erro'">
+                        <label for="email">E-mail</label>
+                        <input id="email" name="email" type="email" autocomplete="username"
+                               th:value="${emailInformado}" placeholder="voce@email.com"
+                               required th:autofocus="${emailInformado == null}">
+                    </div>
+
+                    <div class="campo" th:classappend="${param.erro} ? 'campo--erro'">
+                        <label for="senha">Senha</label>
+                        <input id="senha" name="senha" type="password" autocomplete="current-password"
+                               required th:autofocus="${emailInformado != null}">
+                    </div>
+
+                    <button type="submit" class="botao botao--largo botao--grande">Entrar</button>
+                </form>
+
+                <p class="acesso__troca">
+                    Ainda não tem conta?
+                    <a th:href="@{/cadastro}">Criar conta</a>
+                </p>
+                <p class="acesso__dica">
+                    Digitou um e-mail que ainda não tem conta? Levamos você direto para o
+                    cadastro, com o e-mail já preenchido.
+                </p>
+
+                <details class="credenciais">
+                    <summary>Credenciais de teste (projeto acadêmico)</summary>
+                    <p>
+                        Administrador: <code>admin@mercado.com</code> / <code>admin123</code><br>
+                        Cliente: crie pela tela de cadastro.
+                    </p>
+                </details>
+            </section>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

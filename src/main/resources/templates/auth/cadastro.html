@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!--
+  Sign Up: cria a conta em TDS_USERS_MERCADO com perfil CLIENTE.
+  Chega aqui por tres caminhos: link "Criar conta", CTA da landing ou
+  redirecionamento do login quando o e-mail digitado nao tem conta
+  (CadastroSugeridoFailureHandler -> /cadastro?email=...&origem=login).
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabeca('Criar conta')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('auth')}"></header>
+
+<main id="conteudo" class="conteudo conteudo--acesso">
+    <div class="envelope">
+
+        <div class="acesso">
+
+            <aside class="acesso__lado" aria-hidden="true">
+                <span class="etiqueta etiqueta--estatica acesso__etiqueta">Grátis</span>
+                <p class="acesso__chamada">Sua conta sai em menos de um minuto.</p>
+                <ol class="acesso__passos">
+                    <li><strong>Cadastre-se</strong> com nome, e-mail e uma senha.</li>
+                    <li><strong>Entre</strong> com o e-mail e a senha que acabou de criar.</li>
+                    <li><strong>Passeie pela feira</strong>: catálogo completo e ficha de cada produto.</li>
+                </ol>
+                <p class="acesso__rodape">A senha é guardada com BCrypt. Nem a equipe do mercado consegue lê-la.</p>
+            </aside>
+
+            <section class="acesso__form" aria-labelledby="titulo-cadastro">
+                <p class="sobretitulo">Novo por aqui</p>
+                <h1 id="titulo-cadastro">Criar conta</h1>
+
+                <!-- Veio do login com um e-mail sem conta -->
+                <div class="aviso aviso--atencao" role="status" th:if="${vindoDoLogin}">
+                    <strong>Não encontramos uma conta com
+                        <span th:text="${cadastro.email}">ana@email.com</span>.</strong>
+                    Crie a sua agora: o e-mail já está preenchido, falta só o nome e a senha.
+                    Se digitou errado, <a th:href="@{/login}">volte ao login</a>.
+                </div>
+
+                <form th:action="@{/cadastro}" th:object="${cadastro}" method="post"
+                      class="acesso__campos" novalidate>
+
+                    <div class="sumario-erros" role="alert" th:if="${#fields.hasAnyErrors()}">
+                        <h2>Confira os campos destacados</h2>
+                        <ul>
+                            <li th:each="erro : ${#fields.allErrors()}" th:text="${erro}">Mensagem.</li>
+                        </ul>
+                    </div>
+
+                    <div class="campo" th:classappend="${#fields.hasErrors('nome')} ? 'campo--erro'">
+                        <label for="nome">Nome</label>
+                        <input id="nome" type="text" th:field="*{nome}" maxlength="100"
+                               autocomplete="name" placeholder="Como devemos chamar você?"
+                               th:autofocus="${vindoDoLogin or #fields.hasErrors('nome')}">
+                        <span class="campo__erro" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">Erro.</span>
+                    </div>
+
+                    <div class="campo" th:classappend="${#fields.hasErrors('email')} ? 'campo--erro'">
+                        <label for="email">E-mail</label>
+                        <input id="email" type="email" th:field="*{email}" maxlength="120"
+                               autocomplete="email" placeholder="voce@email.com">
+                        <span class="campo__ajuda">É o seu login. Não compartilhamos com ninguém.</span>
+                        <span class="campo__erro" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Erro.</span>
+                    </div>
+
+                    <div class="dupla">
+                        <div class="campo" th:classappend="${#fields.hasErrors('senha')} ? 'campo--erro'">
+                            <label for="senha">Senha</label>
+                            <input id="senha" type="password" th:field="*{senha}" maxlength="72"
+                                   autocomplete="new-password">
+                            <span class="campo__ajuda">Mínimo de 6 caracteres.</span>
+                            <span class="campo__erro" th:if="${#fields.hasErrors('senha')}" th:errors="*{senha}">Erro.</span>
+                        </div>
+
+                        <div class="campo" th:classappend="${#fields.hasErrors('confirmacaoSenha')} ? 'campo--erro'">
+                            <label for="confirmacaoSenha">Confirme a senha</label>
+                            <input id="confirmacaoSenha" type="password" th:field="*{confirmacaoSenha}"
+                                   maxlength="72" autocomplete="new-password">
+                            <span class="campo__erro" th:if="${#fields.hasErrors('confirmacaoSenha')}"
+                                  th:errors="*{confirmacaoSenha}">Erro.</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="botao botao--largo botao--grande">Criar minha conta</button>
+                </form>
+
+                <p class="acesso__troca">
+                    Já tem conta?
+                    <a th:href="${#strings.isEmpty(cadastro.email)} ? @{/login} : @{/login(email=${cadastro.email})}">Entrar</a>
+                </p>
+                <p class="acesso__dica">
+                    Toda conta criada aqui nasce com o perfil <strong>Cliente</strong>.
+                    O acesso de administrador é concedido pela equipe no painel.
+                </p>
+            </section>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
