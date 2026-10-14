@@ -51,10 +51,10 @@ public class ProdutoService {
         return repository.buscarNoPainel(normalizar(busca), normalizar(setor), paginacao);
     }
 
-    /** Landing page: ate seis produtos ativos com estoque, os mais recentes primeiro. */
+    /** Landing page: ate oito produtos ativos (duas fileiras de quatro) com estoque, os mais recentes primeiro. */
     @Transactional(readOnly = true)
     public List<Produto> listarDestaques() {
-        return repository.findTop6ByAtivoTrueAndEstoqueGreaterThanOrderByDataCadastroDescIdDesc(0);
+        return repository.findTop8ByAtivoTrueAndEstoqueGreaterThanOrderByDataCadastroDescIdDesc(0);
     }
 
     @Transactional(readOnly = true)

@@ -51,7 +51,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
                                  Pageable paginacao);
 
     /** Destaques da landing page: os ativos com estoque mais recentes. */
-    List<Produto> findTop6ByAtivoTrueAndEstoqueGreaterThanOrderByDataCadastroDescIdDesc(Integer estoqueMinimo);
+    List<Produto> findTop8ByAtivoTrueAndEstoqueGreaterThanOrderByDataCadastroDescIdDesc(Integer estoqueMinimo);
 
     /** Alimenta o filtro de setor com o que realmente esta no catalogo. */
     @Query("select distinct p.setor from Produto p where p.ativo = true order by p.setor")
