@@ -1,0 +1,94 @@
+# =====================================================================
+# Mercado Express - Checkpoint 5 (Spring Security MVC + PostgreSQL)
+#
+# Perfil default -> PostgreSQL (local via docker compose ou gerenciado no deploy)
+# Perfil dev     -> H2 em memoria, sem Docker nem credencial
+#
+# Credenciais de producao NUNCA ficam aqui: chegam por variavel de ambiente
+# (DB_URL, DB_USER, DB_PASSWORD). Os defaults abaixo apontam apenas para o
+# Postgres descartavel do docker-compose.yml, para o projeto rodar com um clique.
+# =====================================================================
+spring:
+  application:
+    name: mercadoexpress-security
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/mercadoexpress}
+    username: ${DB_USER:mercado}
+    password: ${DB_PASSWORD:mercado}
+    hikari:
+      # Planos gratuitos (Render/Neon) limitam conexoes: pool enxuto.
+      maximum-pool-size: 5
+      minimum-idle: 1
+
+  jpa:
+    # As tabelas sao criadas pelo database/script.sql. O Hibernate so confere
+    # se a entidade bate com o banco e derruba o startup se nao bater.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+
+  mvc:
+    problemdetails:
+      enabled: false
+
+server:
+  port: ${PORT:8080}
+  # Atras do proxy do Render: respeita X-Forwarded-Proto/Host, para que os
+  # redirects do login/logout saiam em https e com o host publico.
+  forward-headers-strategy: framework
+  error:
+    whitelabel:
+      enabled: false
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+
+# Administrador criado no startup (CommandLineRunner) se ainda nao existir.
+app:
+  admin:
+    nome: Administrador
+    email: ${ADMIN_EMAIL:admin@mercado.com}
+    senha: ${ADMIN_PASSWORD:admin123}
+
+logging:
+  level:
+    org.springframework.security: INFO
+
+---
+# =====================================================================
+# Perfil dev: H2 em memoria (ativar com --spring.profiles.active=dev)
+# =====================================================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:h2:mem:mercadoexpress;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:db/data-dev.sql
+
+  thymeleaf:
+    cache: false
