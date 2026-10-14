@@ -1,5 +1,7 @@
 package br.com.fiap.mercadoexpress.security.config;
 
+import br.com.fiap.mercadoexpress.security.auth.CadastroSugeridoFailureHandler;
+import br.com.fiap.mercadoexpress.security.auth.RedirecionamentoPorPerfilHandler;
 import br.com.fiap.mercadoexpress.security.auth.UsuarioDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +38,9 @@ public class SecurityConfig {
      */
     @Bean
     SecurityFilterChain filtroPrincipal(HttpSecurity http,
-                                        AuthenticationManager gerenciadorDeAutenticacao) throws Exception {
+                                        AuthenticationManager gerenciadorDeAutenticacao,
+                                        RedirecionamentoPorPerfilHandler aposLoginOk,
+                                        CadastroSugeridoFailureHandler aposLoginFalho) throws Exception {
         http
                 .authenticationManager(gerenciadorDeAutenticacao)
 
@@ -64,8 +68,10 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .passwordParameter("senha")
-                        .defaultSuccessUrl("/catalogo", true)
-                        .failureUrl("/login?erro")
+                        // ADMIN -> /admin | CLIENTE -> /catalogo
+                        .successHandler(aposLoginOk)
+                        // e-mail inexistente -> /cadastro?email=... | senha errada -> /login?erro
+                        .failureHandler(aposLoginFalho)
                         .permitAll())
 
                 // Logout so por POST: o formulario do cabecalho envia o token CSRF.
