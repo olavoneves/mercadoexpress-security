@@ -1,6 +1,15 @@
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
+
+### Credenciais e ambiente ###
+.env
+*.log
+
+### Sistema operacional ###
+.DS_Store
+Thumbs.db
+
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -14,7 +23,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
