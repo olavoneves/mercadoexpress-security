@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!--
+  /minha-conta - o usuario logado ve e edita os proprios dados.
+  Dois formularios independentes: dados pessoais e troca de senha.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: cabeca('Minha conta')}"></head>
+<body>
+
+<a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header th:replace="~{fragments/layout :: topo('conta')}"></header>
+
+<main id="conteudo" class="conteudo">
+    <div class="envelope">
+
+        <div th:replace="~{fragments/layout :: avisos}"></div>
+
+        <div class="abertura">
+            <div>
+                <p class="sobretitulo">Sua área</p>
+                <h1>Minha conta</h1>
+                <p>Atualize seus dados de acesso. O e-mail é o seu login.</p>
+            </div>
+        </div>
+
+        <div class="conta">
+
+            <!-- Cartao do perfil -->
+            <aside class="cartao-perfil">
+                <span class="avatar avatar--grande" aria-hidden="true"
+                      th:text="${#strings.toUpperCase(#strings.substring(usuario.nome, 0, 1))}">A</span>
+                <h2 th:text="${usuario.nome}">Ana Souza</h2>
+                <p class="cartao-perfil__email" th:text="${usuario.email}">ana@email.com</p>
+                <span class="selo" th:classappend="${usuario.admin} ? 'selo--admin' : 'selo--cliente'"
+                      th:text="${usuario.perfil.rotulo}">Cliente</span>
+
+                <dl class="ficha">
+                    <div>
+                        <dt>Perfil</dt>
+                        <dd th:text="${usuario.perfil.authority}">ROLE_CLIENTE</dd>
+                    </div>
+                    <div>
+                        <dt>Membro desde</dt>
+                        <dd th:text="${#temporals.format(usuario.dataCadastro, 'dd/MM/yyyy')}">14/10/2026</dd>
+                    </div>
+                    <div>
+                        <dt>Situação</dt>
+                        <dd th:text="${usuario.ativo} ? 'Ativa' : 'Desativada'">Ativa</dd>
+                    </div>
+                </dl>
+
+                <p class="cartao-perfil__nota" th:unless="${usuario.admin}">
+                    O perfil de administrador é concedido pela equipe do mercado.
+                </p>
+            </aside>
+
+            <div class="conta__formularios">
+
+                <!-- Dados pessoais -->
+                <section class="bloco" aria-labelledby="titulo-dados">
+                    <h2 id="titulo-dados">Dados pessoais</h2>
+
+                    <form th:action="@{/minha-conta}" th:object="${conta}" method="post" novalidate>
+                        <div class="sumario-erros" role="alert" th:if="${#fields.hasAnyErrors()}">
+                            <h2>Confira os campos destacados</h2>
+                            <ul>
+                                <li th:each="erro : ${#fields.allErrors()}" th:text="${erro}">Mensagem.</li>
+                            </ul>
+                        </div>
+
+                        <div class="campo" th:classappend="${#fields.hasErrors('nome')} ? 'campo--erro'">
+                            <label for="nome">Nome</label>
+                            <input id="nome" type="text" th:field="*{nome}" maxlength="100" autocomplete="name">
+                            <span class="campo__erro" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">Erro.</span>
+                        </div>
+
+                        <div class="campo" th:classappend="${#fields.hasErrors('email')} ? 'campo--erro'">
+                            <label for="email">E-mail</label>
+                            <input id="email" type="email" th:field="*{email}" maxlength="120" autocomplete="email">
+                            <span class="campo__ajuda">Se mudar o e-mail, use o novo no próximo login.</span>
+                            <span class="campo__erro" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Erro.</span>
+                        </div>
+
+                        <div class="acoes-formulario">
+                            <button type="submit" class="botao">Salvar dados</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Troca de senha -->
+                <section class="bloco" id="senha" aria-labelledby="titulo-senha">
+                    <h2 id="titulo-senha">Trocar senha</h2>
+
+                    <form th:action="@{/minha-conta/senha}" th:object="${troca}" method="post" novalidate>
+                        <div class="sumario-erros" role="alert" th:if="${#fields.hasAnyErrors()}">
+                            <h2>Não foi possível trocar a senha</h2>
+                            <ul>
+                                <li th:each="erro : ${#fields.allErrors()}" th:text="${erro}">Mensagem.</li>
+                            </ul>
+                        </div>
+
+                        <div class="campo" th:classappend="${#fields.hasErrors('senhaAtual')} ? 'campo--erro'">
+                            <label for="senhaAtual">Senha atual</label>
+                            <input id="senhaAtual" type="password" th:field="*{senhaAtual}"
+                                   autocomplete="current-password">
+                            <span class="campo__erro" th:if="${#fields.hasErrors('senhaAtual')}"
+                                  th:errors="*{senhaAtual}">Erro.</span>
+                        </div>
+
+                        <div class="dupla">
+                            <div class="campo" th:classappend="${#fields.hasErrors('senha')} ? 'campo--erro'">
+                                <label for="novaSenha">Nova senha</label>
+                                <input id="novaSenha" type="password" th:field="*{senha}" maxlength="72"
+                                       autocomplete="new-password">
+                                <span class="campo__ajuda">Mínimo de 6 caracteres.</span>
+                                <span class="campo__erro" th:if="${#fields.hasErrors('senha')}"
+                                      th:errors="*{senha}">Erro.</span>
+                            </div>
+
+                            <div class="campo" th:classappend="${#fields.hasErrors('confirmacaoSenha')} ? 'campo--erro'">
+                                <label for="confirmacaoNova">Confirme a nova senha</label>
+                                <input id="confirmacaoNova" type="password" th:field="*{confirmacaoSenha}"
+                                       maxlength="72" autocomplete="new-password">
+                                <span class="campo__erro" th:if="${#fields.hasErrors('confirmacaoSenha')}"
+                                      th:errors="*{confirmacaoSenha}">Erro.</span>
+                            </div>
+                        </div>
+
+                        <div class="acoes-formulario">
+                            <button type="submit" class="botao botao--secundario">Trocar senha</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
