@@ -7,7 +7,6 @@ O Mercado Express é a "feira de bairro" que acompanhamos desde o Checkpoint 4. 
 
 **🔗 Deploy:** [mercadoexpress-security.onrender.com](https://mercadoexpress-security.onrender.com)  ·  **Credenciais de teste:** `admin@mercado.com` / `admin123` (cliente: crie pela tela de cadastro)
 
-<!-- [SUBSTITUIR] Print da landing page no ar -->
 ![Landing page](docs/03-landing.png)
 
 ---
@@ -43,7 +42,6 @@ O Mercado Express é a "feira de bairro" que acompanhamos desde o Checkpoint 4. 
 
 O projeto nasceu no Spring Initializr com Web, Thymeleaf, Security, Data JPA, PostgreSQL Driver, Lombok e Validation:
 
-<!-- [SUBSTITUIR] Print do Spring Initializr -->
 ![Spring Initializr](docs/01-spring-initializr.png)
 
 ---
@@ -116,7 +114,6 @@ Dois tipos de usuário (enum `Perfil`, coluna `PERFIL` de `TDS_USERS_MERCADO`), 
 
 O cabeçalho muda conforme o perfil (`sec:authorize`): visitante vê **Entrar / Criar conta**; logado vê **Catálogo**, **Painel** (só admin), o **nome + perfil** do usuário e o botão **Sair**.
 
-<!-- [SUBSTITUIR] Print do cliente tentando acessar /admin (403) -->
 ![Cliente em /admin recebe 403](docs/10-cliente-admin-403.png)
 
 ---
@@ -144,7 +141,6 @@ A página padrão do Spring Security foi substituída por [`templates/auth/login
 
 A tela trata cada situação com uma mensagem própria: `?restrito` (tentou abrir página protegida), `?erro` (senha errada, com o e-mail mantido no campo), `?logout`, `?inativo`, e o aviso verde "Conta criada!" vindo do cadastro.
 
-<!-- [SUBSTITUIR] Print da tela de login -->
 ![Tela de login](docs/04-login.png)
 
 ### 2. "Sem login → tela de cadastro": o failure handler
@@ -175,7 +171,6 @@ provedor.setHideUserNotFoundExceptions(false);   // deixa a UsernameNotFoundExce
 
 > **Trade-off consciente.** Desligar esse mascaramento permite descobrir se um e-mail tem conta (*user enumeration*). Num sistema bancário isso seria inaceitável; num mercado de bairro com cadastro aberto, o próprio formulário de cadastro já revela isso ("Já existe uma conta com este e-mail"), e a experiência de "não achamos sua conta, crie agora" é exatamente o que o enunciado pede. Em produção real, mitigaríamos com limite de tentativas por IP (*rate limiting*).
 
-<!-- [SUBSTITUIR] Print do login com e-mail inexistente redirecionando ao cadastro -->
 ![Login com e-mail inexistente vai para o cadastro](docs/05-login-email-inexistente-cadastro.png)
 
 ### 3. Cadastro (Sign Up) com Bean Validation
@@ -194,10 +189,8 @@ As duas anotações customizadas ficam em [`validation/`](src/main/java/br/com/f
 
 Toda conta criada pela tela nasce como **`CLIENTE`**, é gravada em `TDS_USERS_MERCADO` e o usuário é levado ao login com o e-mail preenchido.
 
-<!-- [SUBSTITUIR] Print do cadastro com erros de validação -->
 ![Cadastro com erros](docs/06-cadastro-erros.png)
 
-<!-- [SUBSTITUIR] Print do login logo após o cadastro ("Conta criada!") -->
 ![Cadastro concluído](docs/07-cadastro-ok.png)
 
 ### 4. BCrypt e UserDetailsService próprio
@@ -273,10 +266,8 @@ sequenceDiagram
 | **Produto fora de linha** | Só o admin abre a ficha; para o cliente ele responde 404. |
 | **Cookie de sessão** | `HttpOnly` e `SameSite=Lax`. |
 
-<!-- [SUBSTITUIR] Print do catálogo logado como cliente (cabeçalho com nome e perfil) -->
 ![Catálogo como cliente](docs/08-catalogo-cliente.png)
 
-<!-- [SUBSTITUIR] Print da tela Minha conta -->
 ![Minha conta](docs/09-minha-conta.png)
 
 ---
@@ -307,20 +298,21 @@ sequenceDiagram
 
 Detalhes: toda alteração termina em *redirect* com mensagem flash (F5 não reenvia o formulário); desmarcar "Exibir no catálogo" tira o produto do ar sem apagá-lo; a edição preserva id e data de cadastro.
 
-<!-- [SUBSTITUIR] Print do painel administrativo -->
 ![Painel admin](docs/11-painel-admin.png)
 
-<!-- [SUBSTITUIR] Print da lista de usuários -->
 ![Usuários](docs/12-usuarios.png)
 
-<!-- [SUBSTITUIR] Print do formulário de cadastro de produto -->
 ![Cadastro de produto](docs/13-produto-cadastro.png)
 
-<!-- [SUBSTITUIR] Print do formulário de edição -->
+![Produto cadastrado: mensagem de sucesso no painel](docs/13-produto-cadastro-confirmacao.png)
+
 ![Edição de produto](docs/14-produto-edicao.png)
 
-<!-- [SUBSTITUIR] Print da tela de confirmação de exclusão -->
+![Produto editado: mensagem de sucesso no painel](docs/14-produto-edicao-confirmacao.png)
+
 ![Exclusão de produto](docs/15-produto-exclusao.png)
+
+![Produto excluído: mensagem de sucesso no painel](docs/15-produto-exclusao-confirmacao.png)
 
 ---
 
@@ -337,7 +329,6 @@ O script é idempotente (`DROP TABLE IF EXISTS`), usa `GENERATED ALWAYS AS IDENT
 
 > Diferença do CP4: a coluna `ATIVO` era `CHAR(1)` `'S'/'N'` no Oracle e agora é `BOOLEAN` nativo, o que dispensou o `AttributeConverter`.
 
-<!-- [SUBSTITUIR] Print das tabelas no PostgreSQL -->
 ![Tabelas no PostgreSQL](docs/02-tabelas-postgres.png)
 
 ---
@@ -423,7 +414,6 @@ Veja [`.env.example`](.env.example). Nenhuma credencial real é versionada.
 
 > O plano free do Render hiberna após ~15 min sem acesso; a primeira requisição depois disso leva uns 50 s.
 
-<!-- [SUBSTITUIR] Print do deploy no ar (painel do Render + app aberto) -->
 ![Deploy no ar](docs/16-deploy-no-ar.png)
 
 ---
@@ -442,7 +432,9 @@ Roda no perfil `dev` (H2), então passa em qualquer máquina. [`FluxoDeAutentica
 - cadastro válido grava `CLIENTE` com hash BCrypt e e-mail minúsculo; cadastro inválido devolve erro por campo;
 - cliente em `/admin` → 403; POST sem CSRF → 403; logout por POST.
 
-Além disso, o fluxo inteiro foi validado contra o **PostgreSQL real** via `docker compose`, com o CRUD conferido por `SELECT`.
+[`ConexaoPostgresEnvironmentPostProcessorTests`](src/test/java/br/com/fiap/mercadoexpress/security/config/ConexaoPostgresEnvironmentPostProcessorTests.java) cobre a conversão da URL `postgres://` do Render/Neon para JDBC. São **16 testes** no total.
+
+Além disso, o fluxo inteiro foi validado contra o **PostgreSQL real** via `docker compose`, com o CRUD conferido por `SELECT`, e o deploy publicado no Render passou pelo mesmo roteiro.
 
 ---
 
