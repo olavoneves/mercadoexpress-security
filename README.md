@@ -5,7 +5,7 @@
 
 O Mercado Express é a "feira de bairro" que acompanhamos desde o Checkpoint 4. Nesta etapa a aplicação ganhou **contas de usuário de verdade**: cadastro (Sign Up) gravado no PostgreSQL, **tela de login própria**, **dois perfis com acessos diferentes** (Cliente e Administrador), redirecionamento por perfil depois do login, landing page pública e deploy no Render.
 
-**🔗 Deploy:** `[PREENCHER LINK]`  ·  **Credenciais de teste:** `admin@mercado.com` / `admin123` (cliente: crie pela tela de cadastro)
+**🔗 Deploy:** [mercadoexpress-security.onrender.com](https://mercadoexpress-security.onrender.com)  ·  **Credenciais de teste:** `admin@mercado.com` / `admin123` (cliente: crie pela tela de cadastro)
 
 <!-- [SUBSTITUIR] Print da landing page no ar -->
 ![Landing page](docs/03-landing.png)
