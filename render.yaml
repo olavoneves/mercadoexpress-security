@@ -22,9 +22,13 @@ services:
       - key: PORT
         value: 8080
 
-      # JDBC do Postgres gerenciado, ex.:
-      #   Render: jdbc:postgresql://dpg-xxxx-a:5432/mercadoexpress
-      #   Neon..: jdbc:postgresql://ep-xxxx.sa-east-1.aws.neon.tech/neondb?sslmode=require
+      # URL do Postgres gerenciado. Aceita os dois formatos:
+      #   - a "Internal Database URL" do Render, colada como esta:
+      #       postgres://usuario:senha@dpg-xxxx-a/mercadoexpress
+      #     (usuario e senha saem da propria URL; DB_USER/DB_PASSWORD ficam vazios)
+      #   - JDBC: jdbc:postgresql://ep-xxxx.neon.tech/neondb?sslmode=require
+      # A conversao e feita pelo ConexaoPostgresEnvironmentPostProcessor.
+      # DATABASE_URL tambem e aceita no lugar de DB_URL.
       - key: DB_URL
         sync: false
       - key: DB_USER

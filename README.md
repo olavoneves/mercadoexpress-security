@@ -405,8 +405,21 @@ Veja [`.env.example`](.env.example). Nenhuma credencial real é versionada.
    - *Neon:* crie o projeto em neon.tech e copie a *connection string* (formato JDBC).
 2. **Rodar o script** no banco criado: `psql "<connection string>" -f database/script.sql` (no Neon dá para colar no *SQL Editor*).
 3. **Criar o Web Service:** New → Blueprint apontando para este repositório (lê o `render.yaml`), ou New → Web Service → Docker.
-4. **Preencher as variáveis** no painel: `DB_URL` (formato `jdbc:postgresql://...`, **não** o `postgres://` que o painel mostra), `DB_USER`, `DB_PASSWORD` e, opcionalmente, `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+4. **Preencher as variáveis** no painel do web service (*Environment*). "Conectar" o banco ao serviço **não** cria `DB_URL` sozinho; a variável precisa existir:
+   - **Jeito mais simples (Render Postgres):** `DB_URL` = a **Internal Database URL** do banco, colada como está (`postgres://usuario:senha@dpg-xxxx-a/mercadoexpress`). Usuário e senha saem da própria URL.
+   - **Ou JDBC:** `DB_URL` = `jdbc:postgresql://dpg-xxxx-a:5432/mercadoexpress` + `DB_USER` + `DB_PASSWORD`.
+   - Opcional: `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+
+   A tradução de `postgres://` para JDBC é feita pelo [`ConexaoPostgresEnvironmentPostProcessor`](src/main/java/br/com/fiap/mercadoexpress/security/config/ConexaoPostgresEnvironmentPostProcessor.java) (também aceita `DATABASE_URL`). Se nenhuma URL for definida, a aplicação para logo no início com a mensagem *"Banco nao configurado no Render: defina a variavel DB_URL..."*, em vez de tentar `localhost`.
 5. **Deploy.** No primeiro startup o log mostra `Administrador inicial admin@mercado.com criado.` O *health check* usa `/`, que é pública.
+
+| Erro no log do Render | Causa | Correção |
+|---|---|---|
+| `Connection to localhost:5433 refused` | Versão antiga do projeto sem `DB_URL` definida | Atualize o repositório e defina `DB_URL` (passo 4) |
+| `Banco nao configurado no Render` | `DB_URL`/`DATABASE_URL` ausente | Passo 4 |
+| `Schema-validation: missing table [tds_sec_mvc_tb_mercado]` | Script não rodou nesse banco | Passo 2 (`database/script.sql`) |
+| `password authentication failed` | Usuário/senha errados | Recopie a URL do painel do banco |
+| `UnknownHostException dpg-...` | URL interna usada com banco em outra região/conta | Use a **External** URL (com `?sslmode=require`) ou a mesma região |
 
 > O plano free do Render hiberna após ~15 min sem acesso; a primeira requisição depois disso leva uns 50 s.
 
